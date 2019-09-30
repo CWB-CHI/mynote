@@ -73,7 +73,7 @@ x  FIN:finish标志。用于释放连接。
 2. B接收到请求。连接状态从关闭、监听到同步接受【SYN-RCVD】。并且发送回馈报文[SYN=1,ACK=1,seq=y y为任意整数, ack=x+1]。
 3. A接受到报文。转态转为连接已建立[ESTABLISHED] 。并返回报文[SYN=0,ACK=1,seq=x+1,ack=y+1]。B接受到报文。转态转为连接已建立。
 
-<img src="三次握手.png" alt="image-2019091917312523" style="zoom:35%;" />
+<img src="img/三次握手.png" alt="image-2019091917312523" style="zoom:35%;" />
 
 1、2报文段不可携带数据。即SYN=1。但3可以携带，也可不带。
 
@@ -94,7 +94,7 @@ x  FIN:finish标志。用于释放连接。
 3. B在发送完数据后，发送[FIN=1,ACK=1,seq=w,ack=u+1]，转态转为Last-ACK
 4. A回复[ACK=1,seq=u+1,ack=w+1]，状态转为Time-wait在一段时间后转为Closed。B在收到回复后转为Closed转态。
 
-<img src="四次分手.png" alt="image-20190919202359445" style="zoom:35%;" />
+<img src="img/四次分手.png" alt="image-20190919202359445" style="zoom:35%;" />
 
 Time-wait转态作用：确保被动关闭连接方收到第四次挥手的ACK，如果没收到被动方会再次发送Fin报文。
 
@@ -238,7 +238,7 @@ SSL[Security Sockets Layer]安全套接层：
 2. 是操作系统对外的API。SSL3.0后改名TLS。
 3. 身份验证、数据加密保证数据安全性。
 
-<img src="HTTPS.png" alt="image-20190921162826799" style="zoom:40%;" />
+<img src="img/HTTPS.png" alt="image-20190921162826799" style="zoom:40%;" />
 
 #### 加密方式
 
@@ -299,7 +299,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 ###    B-Tree
 
-<img src="Btree.png" alt="image-20190920173142947" style="zoom:40%;" />
+<img src="img/Btree.png" alt="image-20190920173142947" style="zoom:40%;" />
 
 **定义** m阶树  上图为3阶树
 
@@ -318,7 +318,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 ###  B+Tree
 
-<img src="B+Tree.png" alt="image-20190920173301706" style="zoom:40%;" />
+<img src="img/B+Tree.png" alt="image-20190920173301706" style="zoom:40%;" />
 
 ### B+树与B-树的区别
 
@@ -353,7 +353,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 #### 密集索引和稀疏索引
 
-<img src="密集稀疏索引.png" alt="image-20190921162222834" style="zoom:40%;" />
+<img src="img/密集稀疏索引.png" alt="image-20190921162222834" style="zoom:40%;" />
 
 **密集索引**: 每一个数据记录都有对应的索引项
 
@@ -376,7 +376,7 @@ SSL[Security Sockets Layer]安全套接层：
 **聚簇索引** 数据行存放在索引的叶子节点下。一个表只有一个聚簇索引。
 **非聚簇索引** 数据行和索引分开存放。
 
-<img src="聚簇非聚簇索引.png" alt="image-20190921162049888" style="zoom:50%;" />
+<img src="img/聚簇非聚簇索引.png" alt="image-20190921162049888" style="zoom:50%;" />
 
 **MyISAM**:
 使用非聚簇索引，把数据和索引分开存储。
@@ -481,7 +481,7 @@ D持久性: 事务提交后，数据更变后应该永久保存，不会被回�
 **undo日志**
 事务提交**update/delete/insert**的时候，相关的数据行记录到**undo日志**里，日志里保存了修改前旧版本数据的内容。当操作相关数据行的所有事务提交后，这些记录会被删除。
 
-<img src="undo日志.png" alt="image-20190924162528821" style="zoom:50%;" />
+<img src="img/undo日志.png" alt="image-20190924162528821" style="zoom:50%;" />
 
 
 
@@ -523,7 +523,7 @@ InnoDB为了避免**当前读**时产生幻读，会使用**next-key锁**，对�
   * **索引按照(普通索引，主键索引)规则排序**，**无论where条件是否命中**，都会加Gap锁。区间为距离这索引最近的左右两个索引值**(l,r)**，而且对普通索引命中的记录主键要上行锁。
   
 
-<img src="普通索引Gap锁.png" alt="image-2019092419531761" style="zoom:50%;" />
+<img src="img/普通索引Gap锁.png" alt="image-2019092419531761" style="zoom:50%;" />
 
 * **不使用索引**
 
@@ -586,7 +586,7 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 ## JVM结构 
 
-<img src="JVM结构.png" alt="image-2019092516564775" style="zoom:50%;" />
+<img src="img/JVM结构.png" alt="image-2019092516564775" style="zoom:50%;" />
 
 主要4大部分:
 
@@ -599,7 +599,7 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 ### JVM内存模型
 
-<img src="jvm内存模型.png" alt="image-20190926211125473" style="zoom:40%;" />
+<img src="img/jvm内存模型.png" alt="image-20190926211125473" style="zoom:40%;" />
 
 #### 程序计数器 PC Register
 
@@ -752,9 +752,9 @@ HotSpot虚拟机在1.8之后已经取消了永久代，改为元空间，类的�
 #### 双亲委派模型 [Parents Delegation Model]
 除了顶层类加载器，其它加载器都有父类加载器。他们之间并没有java继承关系，是逻辑上的父类
 
-<img src="双亲委派模型1.png" alt="image-20190925191243346" style="zoom:35%;" />
+<img src="img/双亲委派模型1.png" alt="image-20190925191243346" style="zoom:35%;" />
 
-<img src="双亲委派模型2.png" alt="image-20190925234617052" style="zoom:44%;" />
+<img src="img/双亲委派模型2.png" alt="image-20190925234617052" style="zoom:44%;" />
 
 **ClassLoader加载类的过程**
 当一个类加载器接受到类加载的请求
@@ -860,7 +860,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 **堆内空间分配：**Eden + Survivor + Survivor [8:1:1]
 
-<img src="堆内分区.png" alt="image-20190929142042035" style="zoom:18%;" />
+<img src="img/堆内分区.png" alt="image-20190929142042035" style="zoom:18%;" />
 
 
 
@@ -870,7 +870,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 **实现**: 与**标记-清理**算法相似。但第二步，不是清理，而是整理。整理是把存活对象向前移动覆盖掉被回收的对象，使内存空间连续，末端内存全部回收。
 
-<img src="标记-整理算法.png" alt="image-20190929234036473" style="zoom:40%;" />
+<img src="img/标记-整理算法.png" alt="image-20190929234036473" style="zoom:40%;" />
 
 
 
@@ -882,7 +882,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 | JDK1.6  JDK1.7 栈分区+老年代                                 | JDK1.8 栈分区[老年代被移除]                                  |
 | :----------------------------------------------------------- | ------------------------------------------------------------ |
-| <img src="jdk67堆分区.png" alt="image-20190929141723850" style="zoom:27%;" /> | <img src="jdk8堆分区.png" alt="image-20190929141737505" style="zoom:28%;" /> |
+| <img src="img/jdk67堆分区.png" alt="image-20190929141723850" style="zoom:27%;" /> | <img src="img/jdk8堆分区.png" alt="image-20190929141737505" style="zoom:28%;" /> |
 
 
 
@@ -943,7 +943,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 3. GC时，暂停所有用户线程。
 4. -XX:+UseSerialGC 启用Serial
 
-<img src="Serial.png" alt="image-20190929150929581" style="zoom:20%;" align="left" />
+<img src="img/Serial.png" alt="image-20190929150929581" style="zoom:20%;" align="left" />
 
 
 
@@ -956,7 +956,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-<img src="ParNew.png" alt="image-20190929151035688" style="zoom:25%;" align="left"/>
+<img src="img/ParNew.png" alt="image-20190929151035688" style="zoom:25%;" align="left"/>
 
 
 
@@ -972,17 +972,20 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
    $吞吐量=\frac{运行用户代码时间}{(运行用户代码时间+GC时间)}$
 
-5. -XX:+UseParallelGC 启用Parallel Scavenge + Parallel Old。这是JDK7/8默认的垃圾回收器。
+5. 控制吞吐量的参数
 
-6. 控制吞吐量的参数
-
-   1. -XX:MaxGCPauseMillis GC最长时间
-   2. -XX:GCTimeRatio 吞吐量大小
-   3. -XX:+UseAdaptiveSizePolicy 开启后，有些参数可以自动调配，不用人工调整。
+   1. -XX:+UseParallelGC 启用Parallel Scavenge + Parallel Old。这是JDK7/8默认的垃圾回收器。
+   2. -XX:MaxGCPauseMillis GC最长时间
+   3. -XX:GCTimeRatio 吞吐量大小
+   4. -XX:+UseAdaptiveSizePolicy 开启后，有些参数可以自动调配，不用人工调整。
 
    
 
-   <img src="ParallelScavenge.png" alt="image-20190929151611392" style="zoom:30%;" align="left" />
+   <img src="img/ParallelScavenge.png" alt="image-20190929151611392" style="zoom:30%;" align="left" />
+
+
+
+#### 老年代的垃圾回收器
 
 
 
