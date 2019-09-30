@@ -73,7 +73,7 @@ x  FIN:finish标志。用于释放连接。
 2. B接收到请求。连接状态从关闭、监听到同步接受【SYN-RCVD】。并且发送回馈报文[SYN=1,ACK=1,seq=y y为任意整数, ack=x+1]。
 3. A接受到报文。转态转为连接已建立[ESTABLISHED] 。并返回报文[SYN=0,ACK=1,seq=x+1,ack=y+1]。B接受到报文。转态转为连接已建立。
 
-![image-20190919173125283](三次握手.png)
+<img src="三次握手.png" alt="image-2019091917312523" style="zoom:35%;" />
 
 1、2报文段不可携带数据。即SYN=1。但3可以携带，也可不带。
 
@@ -94,7 +94,7 @@ x  FIN:finish标志。用于释放连接。
 3. B在发送完数据后，发送[FIN=1,ACK=1,seq=w,ack=u+1]，转态转为Last-ACK
 4. A回复[ACK=1,seq=u+1,ack=w+1]，状态转为Time-wait在一段时间后转为Closed。B在收到回复后转为Closed转态。
 
-![image-20190919202359445](四次分手.png)
+<img src="四次分手.png" alt="image-20190919202359445" style="zoom:35%;" />
 
 Time-wait转态作用：确保被动关闭连接方收到第四次挥手的ACK，如果没收到被动方会再次发送Fin报文。
 
@@ -142,7 +142,7 @@ Time-wait转态作用：确保被动关闭连接方收到第四次挥手的ACK�
 
 ### 请求结构 
 
-请求行、请求头部、空行、请求数据。
+请求行、请求头部、请求数据。
 
 ```
 请求方法 请求地址 协议版本 
@@ -238,7 +238,7 @@ SSL[Security Sockets Layer]安全套接层：
 2. 是操作系统对外的API。SSL3.0后改名TLS。
 3. 身份验证、数据加密保证数据安全性。
 
-![image-20190921162826799](HTTPS.png)
+<img src="HTTPS.png" alt="image-20190921162826799" style="zoom:40%;" />
 
 #### 加密方式
 
@@ -246,6 +246,8 @@ SSL[Security Sockets Layer]安全套接层：
 2. 非对称加密 加密解密使用不同秘钥。公钥、私钥。
 3. 哈希算法 MD5
 4. 数字签名 
+
+
 
 #### HTTPS传输流程
 
@@ -297,7 +299,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 ###    B-Tree
 
-![image-20190920173142947](Btree.png)
+<img src="Btree.png" alt="image-20190920173142947" style="zoom:40%;" />
 
 **定义** m阶树  上图为3阶树
 
@@ -316,7 +318,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 ###  B+Tree
 
-![image-20190920173301706](B+Tree.png)
+<img src="B+Tree.png" alt="image-20190920173301706" style="zoom:40%;" />
 
 ### B+树与B-树的区别
 
@@ -351,7 +353,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 #### 密集索引和稀疏索引
 
-![image-20190921162222834](密集稀疏索引.png)
+<img src="密集稀疏索引.png" alt="image-20190921162222834" style="zoom:40%;" />
 
 **密集索引**: 每一个数据记录都有对应的索引项
 
@@ -374,7 +376,7 @@ SSL[Security Sockets Layer]安全套接层：
 **聚簇索引** 数据行存放在索引的叶子节点下。一个表只有一个聚簇索引。
 **非聚簇索引** 数据行和索引分开存放。
 
-![image-20190921162049888](聚簇非聚簇索引.png)
+<img src="聚簇非聚簇索引.png" alt="image-20190921162049888" style="zoom:50%;" />
 
 **MyISAM**:
 使用非聚簇索引，把数据和索引分开存储。
@@ -479,7 +481,7 @@ D持久性: 事务提交后，数据更变后应该永久保存，不会被回�
 **undo日志**
 事务提交**update/delete/insert**的时候，相关的数据行记录到**undo日志**里，日志里保存了修改前旧版本数据的内容。当操作相关数据行的所有事务提交后，这些记录会被删除。
 
-![image-20190924162528821](undo日志.png)
+<img src="undo日志.png" alt="image-20190924162528821" style="zoom:50%;" />
 
 
 
@@ -521,7 +523,7 @@ InnoDB为了避免**当前读**时产生幻读，会使用**next-key锁**，对�
   * **索引按照(普通索引，主键索引)规则排序**，**无论where条件是否命中**，都会加Gap锁。区间为距离这索引最近的左右两个索引值**(l,r)**，而且对普通索引命中的记录主键要上行锁。
   
 
-![image-20190924195317661](普通索引Gap锁.png)
+<img src="普通索引Gap锁.png" alt="image-2019092419531761" style="zoom:50%;" />
 
 * **不使用索引**
 
@@ -584,7 +586,7 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 ## JVM结构 
 
-![image-20190925165647785](JVM结构.png)
+<img src="JVM结构.png" alt="image-2019092516564775" style="zoom:50%;" />
 
 主要4大部分:
 
@@ -597,7 +599,7 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 ### JVM内存模型
 
-![image-20190926211125473](jvm内存模型.png)
+<img src="jvm内存模型.png" alt="image-20190926211125473" style="zoom:40%;" />
 
 #### 程序计数器 PC Register
 
@@ -653,6 +655,29 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 
 
+##### 新生代和老年代
+
+**JDK1.7 1.8** 中，HotSpot将**堆**划分为**新生代**和**老年代**。
+**新生代**又划分为: 一个**Eden**、两个**Survivor**空间。比例是**8:1:1**。
+
+
+
+##### 堆栈大小参数调优
+
+-Xss 规定每个线程虚拟机栈/堆的大小
+
+-Xms 堆的初始大小
+
+-Xmx 堆能达到的最大值
+
+-Xmn 设置新生代大小
+
+一般设置 -Xms 和 -Xmx 一样大小，因为内存扩大会影响程序运行。
+
+
+
+
+
 #### 方法区 Method Area
 
 1. 线程共享。
@@ -665,8 +690,8 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 ##### 方法区的一种实现 永久代PermGen Space
 
 方法区[Method Area]是JVM的一种规范，而永久代是Hotspot虚拟机对这种规范的一种实现。
-JDK1.7时，永久代中的**常量池**被移除到**堆Heap**中。
-JDK1.8时，用**元空间**代替**永久代**。
+**JDK1.7**时，永久代中的**常量池**被移除到**堆Heap**中。
+**JDK1.8**时，用**元空间**代替**永久代**。
 
 
 
@@ -687,6 +712,8 @@ HotSpot虚拟机在1.8之后已经取消了永久代，改为元空间，类的�
 如果常量池中，存在次字符串，则这个字符串; 如果常量池中不存在:
 	JDK1.6: 将创建此字符串的副本放入常量池，但是副本是个新对象，引用地址不相同。
 	JDK1.6后: 将次字符串的引用放到常量池，而不是创建一个新的副本。
+
+
 
 
 
@@ -725,9 +752,9 @@ HotSpot虚拟机在1.8之后已经取消了永久代，改为元空间，类的�
 #### 双亲委派模型 [Parents Delegation Model]
 除了顶层类加载器，其它加载器都有父类加载器。他们之间并没有java继承关系，是逻辑上的父类
 
-![image-20190925191243346](双亲委派模型1.png)
+<img src="双亲委派模型1.png" alt="image-20190925191243346" style="zoom:35%;" />
 
-![image-20190925234617052](/Users/chi/Desktop/java/note/offer/双亲委派模型2.png)
+<img src="双亲委派模型2.png" alt="image-20190925234617052" style="zoom:44%;" />
 
 **ClassLoader加载类的过程**
 当一个类加载器接受到类加载的请求
@@ -754,25 +781,13 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
-## JVM调优
-
--Xss 规定每个线程虚拟机栈/堆的大小
-
--Xms 堆的初始大小
-
--Xmx 堆能达到的最大值
-
-一般设置 -Xms 和 -Xmx 一样大小，因为内存扩大会影响程序运行。
-
-
-
 ## GC
 
-### 判断对象是否要被回收
+### 判断对象生存还是死亡
 
 #### 引用计数算法
 
-**实现**: 给对象添加一个引用计数器，每当有一个地方引用就+1，引用失效-1。当这个值为0时，意味对象需要被回收。
+**实现**: 给对象添加一个引用计数器，每当有一个地方引用就+1，引用失效-1。当这个值为0时，意味对象死亡。
 
 **优点**: 实现简单，效率快。
 **缺点**: 无法解决循环引用问题，会导致内存泄露。
@@ -781,11 +796,9 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 #### 可达性分析算法[Java使用此算法]
 
-实现: 把GC Roots作为起点，对象作为终点，检查对象是否可达，如果能找到一条路径[引用链]到一个对象，那么这个对象存活，否则死亡需要被回收。
+实现: 把**GC Roots**作为起点，对象作为终点，检查对象是否可达，如果能找到一条路径[引用链]到一个对象，那么这个对象存活，否则死亡。
 
-
-
-**可作为GC Root的对象**
+**可作为GC Roots的对象**
 
 1. 虚拟机栈[栈帧中的本地变量]中引用的对象。
 2. 方法区中类静态属性引用的对象。
@@ -794,85 +807,186 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
-### JVM回收之前
+#### 被回收的对象
 
-在对象
+GC会回收真正死亡的对象。真的死亡指**对象不可达，并且无法通过finalize方法成为可达的对象。**
 
+一个对象要被回收需要两次标记，第一次标记证明对象不可达，第二次证明对象执行finalize后也不可达。
+第一次: JVM中，不可达的对象被标记。
+第二次: 没必要执行finalize的对象[**没覆盖finalize方法**或者**JVM曾调用过一次**]；有必要执行，但执行后，对象还是不可达的对象。
 
+##### finalize方法
 
-回收算法优缺点 适用场景
+特点:
 
+1. 只运行一次
+2. 不保证能运行到结束。
 
-
-![image-20190929140945053](/Users/chi/Library/Application Support/typora-user-images/image-20190929140945053.png)
-
-![image-20190929141105377](/Users/chi/Library/Application Support/typora-user-images/image-20190929141105377.png)
-
-
-
-![image-20190929141306888](/Users/chi/Library/Application Support/typora-user-images/image-20190929141306888.png)
-
-![image-20190929141352993](/Users/chi/Library/Application Support/typora-user-images/image-20190929141352993.png)
-
-
-
-![image-20190929141510642](/Users/chi/Library/Application Support/typora-user-images/image-20190929141510642.png)
-
-
-
-![image-20190929141614436](/Users/chi/Library/Application Support/typora-user-images/image-20190929141614436.png)
-
-
-
-![image-20190929141658261](/Users/chi/Library/Application Support/typora-user-images/image-20190929141658261.png)
+当一个对象有必要执行finalize方法，此对象会被放入F-Queue队列中，随后JVM用Finalizer线程去执行finalize方法。
 
 
 
 
 
-![image-20190929141723850](/Users/chi/Library/Application Support/typora-user-images/image-20190929141723850.png)
+### 垃圾回收算法
+
+#### 标记-清除算法 Mark and Sweep
+
+它是最基础的算法，后续算法都是根据此算法不足进行改进得到的。
+
+**实现**: 
+
+1. **标记** 标记需要被回收的对象。
+2. **清除** 标记完成后统一回收被标记的对象。
+
+**缺点**:
+
+1. 效率不高。标记和清除效率不高。
+2. 空间碎片化。回收后空间不连续，影响大对象的空间分配，当没有足够大的内存分配给大对象时，会体检触发另一次垃圾回收。
+
+
+
+#### 复制算法 Copying
+
+这个算法解决**标记-清除算法**的两个问题，效率低和空间碎片化。**一般适合新生代。**
+
+**实现**: 将一块内存分为大小相同的两块，只使用其中一块。当一块用完，就将存活对象复制到另外一块空闲内存中[此块内存是按顺序填充，不会出现碎片化内存]，然后清理已使用的内存块。
+
+**优点**: 效率高。空间连续。
+
+**缺点**: 会浪费部分空间，所以只适合对象存活率低的场景。
+
+JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会向外复制，不会有对象复制进Eden，新创建对象放在Eden区，两个Survivor作为相互复制的两块内存，同一时间只有Eden区加1个Survivor区作为存储空间，只有1个Survivor区的空间(10%)被浪费，当发生垃圾回收时，Eden区和一个Survivor区的对象复制到另一个Survivor区。
+
+**堆内空间分配：**Eden + Survivor + Survivor [8:1:1]
+
+<img src="堆内分区.png" alt="image-20190929142042035" style="zoom:18%;" />
+
+
+
+#### 标记-整理 Mark-Compact
+
+这个算法适合**对象存活率高**的场景，而且没有碎片化空间。**一般适合老年代。**
+
+**实现**: 与**标记-清理**算法相似。但第二步，不是清理，而是整理。整理是把存活对象向前移动覆盖掉被回收的对象，使内存空间连续，末端内存全部回收。
+
+<img src="标记-整理算法.png" alt="image-20190929234036473" style="zoom:40%;" />
+
+
+
+#### 分代收集算法 Generational Collector
+
+根据对象的不同的生命周期划分区域，对不同区域使用不同的回收算法。
+**新生代[Young Generation]对象存活率低**: 使用**复制算法**。每次回收有大批对象死去，不需要太多空间，使用**标记-清理/整理**效率慢。
+**老年代[Old Generation]对象存活率高**: 使用**标记-清理/整理**。每次回收有大批对象存活，需要大量空间，使用复制算法可能会空间不足。
+
+| JDK1.6  JDK1.7 栈分区+老年代                                 | JDK1.8 栈分区[老年代被移除]                                  |
+| :----------------------------------------------------------- | ------------------------------------------------------------ |
+| <img src="jdk67堆分区.png" alt="image-20190929141723850" style="zoom:27%;" /> | <img src="jdk8堆分区.png" alt="image-20190929141737505" style="zoom:28%;" /> |
+
+
+
+##### Minor GC 和 Major GC/ Full GC
+
+**Minor GC**: 发生在新生代的垃圾回收。频繁，速度较快。
+**Major GC/ Full GC**: 发生在老年代的垃圾回收。不频繁，速度一般比Minor GC慢10倍以上。 
+
+**Major GC/ Full GC触发条件**:
+
+1. 老年代空间不足
+2. 永久代空间不足
+3. Minor GC后产生晋升老年代的对象，在老年代没有足够空间存放。
+4. 调用System.gc()
+
+
+
+##### 对象从新生代晋升到老年代
+
+1. 经历一定次数Minor GC，依旧存活的对象。[**-XX:MaxTenuringThreshold** 设置次数，超过这个次数放入老年代]
+2. 当Eden装不下一个对象时，先触发一次GC后，Eden区或Survivor区依旧放不下的对象。
+3. 新生成的大对象。[**-XX:PretenuerSizeThreshold** 设置大对象大小，超过这个大小直接放入老年代]
+
+
+
+#### 垃圾回收参数调优
+
+-XX:SurvivorRatio Eden和Survivor的比例，默认8:1。
+
+-XX:NewRatio 新生代和老年代的内存大小比例。
+
+-XX:PretenuerSizeThreshold 对象直接进入老年代的最小阈值。
+
+-XX:MaxTenuringThreshold 设置对象经历GC次数的最大阈值，超过这个次数放入老年代
 
 
 
 
 
-![image-20190929141737505](/Users/chi/Library/Application Support/typora-user-images/image-20190929141737505.png)
+###垃圾收集器 [垃圾回收算法的实现]
 
-![image-20190929141907720](/Users/chi/Library/Application Support/typora-user-images/image-20190929141907720.png)
+**Stop-the-World**: GC发生时必须停顿所有线程，为了保证可达性分析的准确性，不停顿那么对象可达性会有不断变化。
 
+**安全点[Safepoint]**:
 
-
-![image-20190929142042035](/Users/chi/Library/Application Support/typora-user-images/image-20190929142042035.png)
-
-![image-20190929142435462](/Users/chi/Library/Application Support/typora-user-images/image-20190929142435462.png)
-
-
+1. 一个特定的位置，用来生成OopMap[Ordinary Object Pointer Map]，<通过OopMap，JVM可以得知对象引用存放的位置[可作为GC Roots的对象]，不用去不同的内存区中扫描找出对象引用，这可以协助GC Roots的枚举快速完成，以便完成可达性算法>
+2. 这个位置的选取标准是**让程序长时间执行的地方[例如方法调用、循环、异常跳转等]**。
+3. 安全点数量不可过多，过多会影响性能。
 
 
 
-![image-20190929142606433](/Users/chi/Library/Application Support/typora-user-images/image-20190929142606433.png)
+#### 新生代的垃圾回收器 Garbage Collectors [专门回收新生代]
+
+##### Serial
+
+1. 单线程垃圾回收器。
+2. 采用复制算法回收新生代。
+3. GC时，暂停所有用户线程。
+4. -XX:+UseSerialGC 启用Serial
+
+<img src="Serial.png" alt="image-20190929150929581" style="zoom:20%;" align="left" />
+
+
+
+##### ParNew
+
+1. 多线程垃圾回收器。其实是Serial的多线程版本。
+2. 也是采用复制算法回收新生代。
+3. GC时，也是暂停所有用户线程。
+4. -XX:+UseParNew 启用ParNew。
+
+
+
+<img src="ParNew.png" alt="image-20190929151035688" style="zoom:25%;" align="left"/>
+
+
+
+##### Parallel Scavenge
+
+1. 多线程垃圾回收器。
+
+2. 采用复制算法回收新生代。
+
+3. GC时，也会暂停所有用户线程。
+
+4. 这个回收器更加注重吞吐量，而不是缩短用户线程停顿时间。有利于提高CPU使用率，主要适合后台运算多且交互少的任务。
+
+   $吞吐量=\frac{运行用户代码时间}{(运行用户代码时间+GC时间)}$
+
+5. -XX:+UseParallelGC 启用Parallel Scavenge + Parallel Old。这是JDK7/8默认的垃圾回收器。
+
+6. 控制吞吐量的参数
+
+   1. -XX:MaxGCPauseMillis GC最长时间
+   2. -XX:GCTimeRatio 吞吐量大小
+   3. -XX:+UseAdaptiveSizePolicy 开启后，有些参数可以自动调配，不用人工调整。
+
+   
+
+   <img src="ParallelScavenge.png" alt="image-20190929151611392" style="zoom:30%;" align="left" />
 
 
 
 
-
-![image-20190929142724832](/Users/chi/Library/Application Support/typora-user-images/image-20190929142724832.png)
-
-![image-20190929142820560](/Users/chi/Library/Application Support/typora-user-images/image-20190929142820560.png)
-
-
-
-![image-20190929143420585](/Users/chi/Library/Application Support/typora-user-images/image-20190929143420585.png)
-
-
-
-![image-20190929143531741](/Users/chi/Library/Application Support/typora-user-images/image-20190929143531741.png)
-
-![image-20190929145525522](/Users/chi/Library/Application Support/typora-user-images/image-20190929145525522.png)
-
-
-
-![image-20190929150639441](/Users/chi/Library/Application Support/typora-user-images/image-20190929150639441.png)
 
 
 
@@ -880,17 +994,15 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
- ![image-20190929150929581](/Users/chi/Library/Application Support/typora-user-images/image-20190929150929581.png)
-
-
-
-![image-20190929151035688](/Users/chi/Library/Application Support/typora-user-images/image-20190929151035688.png)
 
 
 
 
 
-![image-20190929151611392](/Users/chi/Library/Application Support/typora-user-images/image-20190929151611392.png)
+
+
+
+
 
 
 
