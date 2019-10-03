@@ -922,7 +922,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-###垃圾收集器 [垃圾回收算法的实现]
+###垃圾回收器Garbage Collectors  [垃圾回收算法的实现]
 
 **Stop-the-World**: GC发生时必须停顿所有线程，为了保证可达性分析的准确性，不停顿那么对象可达性会有不断变化。
 
@@ -934,14 +934,22 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-#### 新生代的垃圾回收器 Garbage Collectors [专门回收新生代]
+**新生代垃圾回收器**[专门回收新生代] Serial、ParNew、Parallel Scavenge、G1
+**老年代垃圾回收器**[专门回收老年代] Serial Old、Parallel Old、CMS[Concurrent Mark Sweep]、G1
+
+<img src="img/垃圾回收器.png" alt="image-20190930192844545" style="zoom:27%;" />
+
+
+
+
+
+#### 新生代的垃圾回收器 
 
 ##### Serial
 
 1. 单线程垃圾回收器。
 2. 采用复制算法回收新生代。
 3. GC时，暂停所有用户线程。
-4. -XX:+UseSerialGC 启用Serial
 
 <img src="img/Serial.png" alt="image-20190929150929581" style="zoom:20%;" align="left" />
 
@@ -951,10 +959,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 1. 多线程垃圾回收器。其实是Serial的多线程版本。
 2. 也是采用复制算法回收新生代。
-3. GC时，也是暂停所有用户线程。
-4. -XX:+UseParNew 启用ParNew。
-
-
+3. GC时，暂停所有用户线程。
 
 <img src="img/ParNew.png" alt="image-20190929151035688" style="zoom:25%;" align="left"/>
 
@@ -974,18 +979,40 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 5. 控制吞吐量的参数
 
-   1. -XX:+UseParallelGC 启用Parallel Scavenge + Parallel Old。这是JDK7/8默认的垃圾回收器。
-   2. -XX:MaxGCPauseMillis GC最长时间
+   1. -XX:MaxGCPauseMillis GC最长时间
    3. -XX:GCTimeRatio 吞吐量大小
    4. -XX:+UseAdaptiveSizePolicy 开启后，有些参数可以自动调配，不用人工调整。
-
    
 
-   <img src="img/ParallelScavenge.png" alt="image-20190929151611392" style="zoom:30%;" align="left" />
+<img src="img/ParallelScavenge.png" alt="image-20190929151611392" style="zoom:25%;" align="left" />
 
 
 
-#### 老年代的垃圾回收器
+#### 老年代的垃圾回收器 
+
+##### Serial Old
+
+1. 单线程垃圾回收器。
+
+2. 采用标记-整理算法回收老年代。
+
+3. GC时，暂停所有用户线程。
+
+<img src="img/SerialOld.png" alt="image-20190930193356577" style="zoom:25%;" align="left" />
+
+
+
+##### Parallel Old
+
+1. 多线程垃圾回收器。
+2. 采用标记-整理算法回收老年代。
+3. GC时，也会暂停所有用户线程。
+
+
+
+##### CMS
+
+1. 
 
 
 
@@ -993,20 +1020,4 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-![image-20190929150757008](/Users/chi/Library/Application Support/typora-user-images/image-20190929150757008.png)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-![image-20190929152927131](/Users/chi/Library/Application Support/typora-user-images/image-20190929152927131.png)
