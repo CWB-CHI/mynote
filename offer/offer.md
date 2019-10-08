@@ -3,6 +3,8 @@
 
 ## 双工术语
 
+<img src="img/单双工.png" alt="image-20191007224314021" style="zoom:50%;" />
+
 ### 全双工
 
 允许数据在两个方向上同时传输。
@@ -781,11 +783,11 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
-## GC
+# GC
 
-### 判断对象生存还是死亡
+## 判断对象生存还是死亡
 
-#### 引用计数算法
+### 引用计数算法
 
 **实现**: 给对象添加一个引用计数器，每当有一个地方引用就+1，引用失效-1。当这个值为0时，意味对象死亡。
 
@@ -794,7 +796,7 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
-#### 可达性分析算法[Java使用此算法]
+### 可达性分析算法[Java使用此算法]
 
 实现: 把**GC Roots**作为起点，对象作为终点，检查对象是否可达，如果能找到一条路径[引用链]到一个对象，那么这个对象存活，否则死亡。
 
@@ -807,7 +809,7 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 
-#### 被回收的对象
+### 被回收的对象
 
 GC会回收真正死亡的对象。真的死亡指**对象不可达，并且无法通过finalize方法成为可达的对象。**
 
@@ -815,7 +817,7 @@ GC会回收真正死亡的对象。真的死亡指**对象不可达，并且无�
 第一次: JVM中，不可达的对象被标记。
 第二次: 没必要执行finalize的对象[**没覆盖finalize方法**或者**JVM曾调用过一次**]；有必要执行，但执行后，对象还是不可达的对象。
 
-##### finalize方法
+#### finalize方法
 
 特点:
 
@@ -828,9 +830,9 @@ GC会回收真正死亡的对象。真的死亡指**对象不可达，并且无�
 
 
 
-### 垃圾回收算法
+## 垃圾回收算法
 
-#### 标记-清除算法 Mark and Sweep
+### 标记-清除算法 Mark and Sweep
 
 它是最基础的算法，后续算法都是根据此算法不足进行改进得到的。
 
@@ -846,7 +848,7 @@ GC会回收真正死亡的对象。真的死亡指**对象不可达，并且无�
 
 
 
-#### 复制算法 Copying
+### 复制算法 Copying
 
 这个算法解决**标记-清除算法**的两个问题，效率低和空间碎片化。**一般适合新生代。**
 
@@ -864,7 +866,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-#### 标记-整理 Mark-Compact
+### 标记-整理 Mark-Compact
 
 这个算法适合**对象存活率高**的场景，而且没有碎片化空间。**一般适合老年代。**
 
@@ -874,7 +876,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-#### 分代收集算法 Generational Collector
+### 分代收集算法 Generational Collector
 
 根据对象的不同的生命周期划分区域，对不同区域使用不同的回收算法。
 **新生代[Young Generation]对象存活率低**: 使用**复制算法**。每次回收有大批对象死去，不需要太多空间，使用**标记-清理/整理**效率慢。
@@ -886,7 +888,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-##### Minor GC 和 Major GC/ Full GC
+#### Minor GC 和 Major GC/ Full GC
 
 **Minor GC**: 发生在新生代的垃圾回收。频繁，速度较快。
 **Major GC/ Full GC**: 发生在老年代的垃圾回收。不频繁，速度一般比Minor GC慢10倍以上。 
@@ -900,39 +902,55 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-##### 对象从新生代晋升到老年代
+## 对象分配策略
 
-1. 经历一定次数Minor GC，依旧存活的对象。[**-XX:MaxTenuringThreshold** 设置次数，超过这个次数放入老年代]
-2. 当Eden装不下一个对象时，先触发一次GC后，Eden区或Survivor区依旧放不下的对象。
+### 新生对象分配到新生代的Eden区
+
+* Eden有足够空间，新对象会被分配到Eden区。
+* Eden空间不够，触发Minor GC后，
+  * 空间足够，将新对象放到Eden区。
+  * 空间依然不足，新对象将会放到老年代区域。
+
+
+
+### 对象从新生代晋升到老年代
+
+1. 长期存活的对象。经历一定次数Minor GC，依旧存活的对象。[**-XX:MaxTenuringThreshold** 设置次数，超过这个次数放入老年代]
+2. GC后，新生代空间依然不足以放下的对象。当Eden装不下一个对象时，先触发Minor GC后，Eden区或Survivor区依旧放不下的对象。
 3. 新生成的大对象。[**-XX:PretenuerSizeThreshold** 设置大对象大小，超过这个大小直接放入老年代]
 
 
 
-#### 垃圾回收参数调优
-
--XX:SurvivorRatio Eden和Survivor的比例，默认8:1。
-
--XX:NewRatio 新生代和老年代的内存大小比例。
-
--XX:PretenuerSizeThreshold 对象直接进入老年代的最小阈值。
-
--XX:MaxTenuringThreshold 设置对象经历GC次数的最大阈值，超过这个次数放入老年代
 
 
 
 
+##垃圾回收器Garbage Collectors  [垃圾回收算法的实现]
 
-###垃圾回收器Garbage Collectors  [垃圾回收算法的实现]
+### Stop-the-world [STW]
 
-**Stop-the-World**: GC发生时必须停顿所有线程，为了保证可达性分析的准确性，不停顿那么对象可达性会有不断变化。
+```
+GC发生时必须停顿所有线程，为了保证可达性分析的准确性，不停顿那么对象可达性会有不断变化。
+```
 
-**安全点[Safepoint]**:
 
-1. 一个特定的位置，用来生成OopMap[Ordinary Object Pointer Map]，<通过OopMap，JVM可以得知对象引用存放的位置[可作为GC Roots的对象]，不用去不同的内存区中扫描找出对象引用，这可以协助GC Roots的枚举快速完成，以便完成可达性算法>
-2. 这个位置的选取标准是**让程序长时间执行的地方[例如方法调用、循环、异常跳转等]**。
+
+### OopMap[Ordinary Object Pointer Map]
+通过OopMap，JVM可以得知对象引用存放的位置[可作为GC Roots的对象]，不用去不同的内存区中扫描找出对象引用，这可以协助GC Roots的枚举快速完成，以便完成可达性算法
+
+
+
+### 安全点[Safepoint]
+
+1. 一个特定的位置，用来生成**OopMap**。
+2.  这个位置的选取标准是**让程序长时间执行的地方[例如方法调用、循环、异常跳转等]**。
 3. 安全点数量不可过多，过多会影响性能。
 
 
+
+
+
+### 垃圾回收器分类
 
 **新生代垃圾回收器**[专门回收新生代] Serial、ParNew、Parallel Scavenge、G1
 **老年代垃圾回收器**[专门回收老年代] Serial Old、Parallel Old、CMS[Concurrent Mark Sweep]、G1
@@ -943,9 +961,9 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-#### 新生代的垃圾回收器 
+### 新生代的垃圾回收器 
 
-##### Serial
+#### Serial
 
 1. 单线程垃圾回收器。
 2. 采用复制算法回收新生代。
@@ -955,7 +973,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-##### ParNew
+#### ParNew
 
 1. 多线程垃圾回收器。其实是Serial的多线程版本。
 2. 也是采用复制算法回收新生代。
@@ -965,7 +983,7 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-##### Parallel Scavenge
+#### Parallel Scavenge
 
 1. 多线程垃圾回收器。
 
@@ -988,13 +1006,13 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-#### 老年代的垃圾回收器 
+### 老年代的垃圾回收器 
 
-##### Serial Old
+#### Serial Old
 
 1. 单线程垃圾回收器。
 
-2. 采用标记-整理算法回收老年代。
+2. 采用**标记-整理**算法回收老年代。
 
 3. GC时，暂停所有用户线程。
 
@@ -1002,19 +1020,82 @@ JDK1.7 1.8，HotSpot默认对新生代区域使用此种算法。Eden区只会�
 
 
 
-##### Parallel Old
+#### Parallel Old
 
 1. 多线程垃圾回收器。
-2. 采用标记-整理算法回收老年代。
+2. 采用**标记-整理**算法回收老年代。
 3. GC时，也会暂停所有用户线程。
 
 
 
-##### CMS
+#### CMS[Concurrent Mark Sweep]
 
-1. 
+1. 以获得最短回收停顿时间[Stop-the-world]为目标的收集器。
+2. 采用**标记-清除**算法回收老年代。会产生空间碎片。
+3. 4个步骤。**只有初始标记、重新标记会Stop-the-world，后者会比前者长。并发标记、并发清除耗时长。**
+   1. **初始标记**[CMS initial mark] 标记GC Roots直接关联的对象，速度快。
+   2. 并发标记[CMS concurrent mark] 追溯GC Roots相连的对象。
+   3. **重新标记**[CMS remark] 对并发标记期间因用户线程运行导致标记产生的变动进行修正。
+   4. 并发清除[CMS concurrent sweep] 
 
 
+
+<img src="img/CMS.png" alt="image-20191004020843365" style="zoom:30%;" align="left"/>
+
+
+
+#### G1[Garbage First]
+
+1. 并行并发
+2. 分代收集。 新生代使用复制算法。老年代使用标记-整理算法
+3. 可预测停顿。可以指定停顿时间长度，不超过N毫秒。
+4. 将堆化成多个区域Region，新生代老年代不再物理隔离，它们由不连续的Region组成。后台维护优先列表，优先回收价值最大的Region。
+
+
+
+## 垃圾回收参数调优
+
+-XX:SurvivorRatio Eden和Survivor的比例，默认8:1。
+
+-XX:NewRatio 新生代和老年代的内存大小比例。
+
+-XX:PretenuerSizeThreshold 对象直接进入老年代的最小阈值。
+
+-XX:MaxTenuringThreshold 设置对象经历GC次数的最大阈值，超过这个次数放入老年代
+
+
+
+### 各个回收器组合
+
+#### -XX:+UseSerialGC
+
+    Serial + Serial Old
+
+#### -XX:+UseParNewGC
+
+    ParNew + Serial Old
+
+#### -XX:+UseParallelGC
+
+    Parallel Scavenge + Serial Old
+
+#### -XX:+UseParallelOldGC
+
+    Parallel Scavenge + Parallel Old
+
+#### -XX:+UseConcMarkSweepGC
+
+    ParNew + CMS[Concurrent Mark Sweep] + Serial Old[CMS碎片过多时，备用标记-整理]
+
+
+
+### JVM默认参数 GC回收器
+
+**通过命令查询**:
+
+```java
+> java -XX:+PrintCommandLineFlags -XX:+PrintGCDetails -version
+```
 
 
 
