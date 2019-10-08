@@ -1099,6 +1099,196 @@ GC发生时必须停顿所有线程，为了保证可达性分析的准确性，
 
 
 
+# 多线程与并发
+
+## 面试题
+
+### Thread中start和run方法的区别
+
+start: 会创建一个子线程
+run: 线程执行的方法
+
+### Thread 和 Runnable 的区别
+
+Thread是个类实现了Runnable接口，Runnable接口只有一个run方法。
+
+### 如何给run传参数
+
+1. 构造参数
+2. 成员变量setter
+3. 回调函数
+
+### 处理线程返回值
+
+1. 主线程等待直到子线程执行结束。
+2. 调用子线程Thread的join方法阻塞当前线程直到子线程执行完成。
+3. 使用Callable接口+[FutureTask+Thread]/[ExcutorService]实现。
+
+### sleep和wait区别
+
+1. sleep是Thread的方法，wait是Object的方法
+2. sleep可以在任何地方使用，不会释放锁
+3. wait只能在synchronized方法或synchronized代码块中使用，会释放锁
+
+### notify 和 notifyAll 区别
+
+#### 锁池 EntryList
+
+等待获取排它锁，竞争排它锁的线程集合。
+
+#### 等待池 WaitSet
+
+调用wait方法后，线程进入等待池。
+
+notify: 随机选取一个线程从等待池进入锁池，即让一个等待线程获得竞争锁的资格。
+
+notifyAll: 所有等待池中的线程进入锁池，获得竞争资格。
+
+### Thead.yield()
+
+暗示程序调度器，愿意让出CPU时间，但调度器可能会忽视这个暗示。也不会让出锁。
+
+### Thread.interrupt()
+
+通知线程应该被中断，但并不会被中断。调用时，
+
+* 线程被阻塞[指wait/timed wait状态，而不是Blocked状态]，抛出InterruptedException。
+* 处于活动状态，该线程的中断标记设置为true，然后继续运行，不受影响。
+
+**使用方法**: 需要被调用的线程配合，在运行时要检查中断标记位，如果为true，就自行中断异常。
+
+### 如何中断线程
+
+* deprecated方法，不安全
+  stop方法
+  suspend方法 + resume方法
+* 安全的方法，调用interrupt方法。
+
+
+
+
+
+
+
+## Java中线程状态
+
+* **New**[新建] 创建后尚未启动的线程
+* **Runnable**[运行] 包括**Ready**[准备就绪] 和 **Running**[运行中] 两个状态，这两个状态会因为**系统调度**或者**yield方法**相互转换。
+  * Ready 等待分配CPU时间
+  * Running 正在运行
+* **Blocked**[阻塞] 等待获取排它锁
+* **Waiting**[等待] 不会被分配CPU时间，需要显示唤醒
+  * 没设置时间的
+    Object.wait() 
+    Thread.join() 
+    LockSupport.park()
+* **Timed Waiting**[超时等待] 一定时间后由系统自动唤醒
+  * 设置时间的
+    Object.wait(time) 
+    Thread.join(time) 
+    LockSupport.parkNanos() 
+    LockSupport.parkUntil()
+* **Terminated**[终止] 线程结束执行
+
+
+
+<img src="img/线程状态.png" alt="线程状态" style="zoom:70%;" />
+
+## synchronized底层实现原理
+
+### Monitor
+
+synchronized实现依靠Monitor。每个对象都有一个Monitor对象，Monitor是个锁对象。包含以下字段:
+
+* **EntryList**锁池
+* **WaitSet**等待池
+* **Owner** 指向持有该锁的线程
+* **Counter** 持有该锁的线程数
+
+<img src="img/Monitor.png" alt="image-20191008182911562" style="zoom:35%;" align="left" />
+
+
+
+### 重入
+
+指一个线程已有某个资源锁时，此线程再次请求同一个资源锁。
+
+synchronized具有可重入性。
+
+
+
+## HotSpot对锁的优化
+
+### synchronized的4种状态
+
+**锁的膨胀方向由上到下**:
+
+- **无锁** 
+- **偏向锁**
+- **轻量级锁** 使用自旋锁
+- **重量级锁** 
+
+
+
+**锁的优化**:
+
+* **适应性自旋** Adaptive Spinning
+* **锁消除** Lock Elimination
+* **锁粗化** Lock Coarsening
+* **偏向锁** Biased Lock
+* **轻量级锁** Lightweight Lock
+
+
+
+### 自旋锁和自适应自旋
+
+**自旋锁**
+
+许多情况下，共享数据的锁定状态持续时间短，线程的挂起、恢复操作消耗大。对等待线程进行优化，不放弃CPU资源，执行**忙循环(自旋)**，这就是自旋锁。
+
+**缺点**: 尽管可设置自旋次数，如果锁被占用很长时间，会带来更多的性能开销。
+
+
+
+**自适应自旋锁**
+
+自旋次数不再固定，由前一次同一个锁上的自旋时间决定。
+
+
+
+### 锁消除
+
+JIT[Just-in-time]编译时，运行环境进行扫描，去除不可能存在竞争的锁。例如StringBuffer的append方法是synchronized方法，如果只有一个线程执行，那么这方法会被当成普通方法而非synchronized方法，提高运行速度。
+
+
+
+### 锁粗化
+
+锁的粒度太细，有时候会导致反复加锁和解锁，加大开销，加大锁的范围，避免反复加锁和解锁。例如下面代码会粗化
+
+```java
+public String get(StringBuffer sb){
+  while(i < 100) {
+  	sb.append("h"); //把锁范围扩大到循环体，避免反复加锁、解锁
+	}
+}
+```
+
+
+
+### 偏向锁
+
+线程在**同步代码中，无竞争时，提高运行速度**。偏向第一个获得锁的线程，如果没有另外一个线程获得这个锁，那么偏向的线程再次进入同步代码时可不进行同步操作。
+
+**升级为轻量级锁**: 当有另一个线程加入竞争时，升级锁。
+
+**缺点**: 多线程竞争大时，偏向锁是多余的。
+
+
+
+
+
+
 
 
 
