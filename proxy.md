@@ -113,9 +113,11 @@ final class WeakCache<K, P, V> {
 
 ## ##CGLIB代理，生成代理的子类
 
-被代理的类不需要继承接口。动态创建子类的方法，所以对final方法无法做出代理。
+使用ASM框架生成字节码？？？？，被代理的类不需要继承接口。动态创建子类的方法，所以对final类、final方法、static方法无法做出代理。
 
 # #面向切面AspectJ
+
+Spring AOP使用**JDK动态代理**/**CGLIB**实现aop而不是**AspectJ**。
 
 与前两种代理Proxy 和 CGLIB 不同，前两种代理是在运行时生成class字节码，这种是编译时，生成class字节码。
 
