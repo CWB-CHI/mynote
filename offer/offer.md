@@ -545,7 +545,7 @@ InnoDB为了避免**当前读**时产生幻读，会使用**next-key锁**，对�
 
 ### 第三范式
 
-满足第二范式，**非主键外的所有字段必须互不依赖。**
+满足第二范式，**非主键字段必须互不依赖。**
 
 
 
@@ -729,7 +729,7 @@ HotSpot虚拟机在1.8之后已经取消了永久代，改为元空间，类的�
 
 2. **连接阶段** 此阶段部分内容与加载交叉进行，例如验证字节码
 2.1 **验证** 检查字节码是否符合规范，不会危害JVM。
-   2.2 **准备** 为**类变量**分配内存和设置**零值**[而不是初始化的值]，而初始化值是在初始化阶段进行。但如果类变量的值是常量[修饰符static final]，那么会直接设置初始化值。
+  2.2 **准备** 为**类变量**分配内存和设置**零值**[而不是初始化的值]，而初始化值是在初始化阶段进行。但如果类变量的值是常量[修饰符static final]，那么会直接设置初始化值。
    2.3 **解析** 将常量池内的符号引用转为直接引用。
   
 3. **初始化阶段** 执行类构造器<clinit>()[所有类变量的赋值动作+static代码块]
@@ -784,6 +784,17 @@ forName: 加载类完成了初始化阶段，会执行static代码块。
 
 
 # GC
+
+## 引用类型
+
+| 引用类型 | 被GC回收情况 | 用途         | 生存时间          |
+| -------- | ------------ | ------------ | ----------------- |
+| 强引用   | 从来不会     | 对象一般状态 | JVM停止运行时终止 |
+| 软引用   | 内存不足时   | 缓存         | 内存不足时终止    |
+| 弱引用   | 发生GC时     | 缓存         | 发生GC后终止      |
+| 虚引用   | -            | 标记、哨兵   | -                 |
+
+
 
 ## 判断对象生存还是死亡
 
@@ -1152,7 +1163,8 @@ notifyAll: 所有等待池中的线程进入锁池，获得竞争资格。
 
 通知线程应该被中断，但并不会被中断。调用时，
 
-* 线程被阻塞[指wait/timed wait状态，而不是Blocked状态]，抛出InterruptedException。
+* 线程在**等待池**中[指wait/timed wait状态]，抛出InterruptedException，并退出当前状态。
+* 线程在锁池中[指阻塞Blocked状态]不会抛出任何异常，也不会终止线程。
 * 处于活动状态，该线程的中断标记设置为true，然后继续运行，不受影响。
 
 **使用方法**: 需要被调用的线程配合，在运行时要检查中断标记位，如果为true，就自行中断异常。
@@ -1288,7 +1300,392 @@ public String get(StringBuffer sb){
 
 
 
+## ReentrantLock 再入锁
 
+* 和CountDownLatch、FutureTask、Semaphore一样，都是基于AQS[AbstractQueuedSynchronizer]实现。
+* 可控性更高，实现比synchronized粒度更小的控制，如控制fairness公平性、判断是否获得锁。
+* 可通过Condition实现wait、notify的功能。
+* 调用lock()方法后要调用unlock()方法释放锁。
+* 性能不一定比synchronized高
+* 可重入
+
+**fiarness 公平性**: 倾向于将锁给等待时间最久的线程。
+
+```java
+ReentrantLock fairLock = new ReentrantLock(true); // 公平锁
+```
+
+
+
+## Java内存模型 JMM
+
+<img src="img/java内存模型.png" alt="image-20191008223502180" style="zoom:40%;" />
+
+**JMM** 和 **java内存区域划分**的区别: JMM是规则、规范，它并不存在，只是定义了各个变量的访问方式，但都存在共享区域和私有区域。
+
+**规范**: 
+
+* 方法中的基本数据类型、对象引用直接存储在**工作内存[线程私有]**的栈帧中。
+* 对象实例、成员变量、类信息、static变量存储在**主内存[线程共享]**中。
+* 主内存的数据操作方式是，线程复制一个副本到**工作内存**中，完成操作后，写回**主内存**中。
+
+### 指令重排序
+
+要满足以下条件:
+
+* 单线程环境不能改变运行结果
+* 存在数据依赖关系不能重拍
+* 不符合**happens-before**的规则
+
+### Happens-before
+
+1. 程序顺序规则: 单线程，前面代码发生在后面代码之前。
+2. 锁定规则: 前面的解锁操作先于后面的加锁操作。
+3. volatile变量规则: 对一个变量的前面的写操作先于后面的读操作。
+4. 传递规则: 如果操作A发生先于操作B，操作B先于操作C，那么操作A先于操作C。
+5. 线程启动规则: start方法先于此线程的每一个动作。
+6. 线程中断规则: 前面的interrupt方法先于后面被中断线程isInterrupt方法的执行
+7. 线程终结规则: 线程中所有操作先于线程终止检测[Thread.join/isAlive...]
+8. 对象终结规则: 一个对象的初始化先于finalize方法。
+
+
+
+## volatile
+
+### volatile的可见性
+
+**非volatile变量的不可见性:**
+
+<img src="img/不可见性.png" alt="image-20191011140446862" style="zoom:40%;" />
+
+**JVM提供的轻量级同步机制**
+
+* **可见性**。保证volatile的共享变量的修改对所有线程总是**立即可见**。任何改变都会立刻反映到主内存中。
+
+* **禁止指令重排**
+
+**volatile为何立即可见？**
+**写**: 将值直接写到主内存中。
+**读**: 每次都从主内存中读取。
+
+### 单例类的双重检验
+
+用volatile可禁止指令重排，避免错误
+
+```java
+private volatile static Singleton instance;
+
+public static Singleton getInstance() {
+  if(instance == null) {
+    synchronized(Singleton.class) {
+      if(instance == null) {
+        instance = new Singleton(); // new Singleton();有3个指令，非原子操作，可能发生指令重排
+      }
+    }
+  }
+  return instance;
+}
+
+/*
+new Singleton():
+重排前
+memory = allocate(); // 1. 分配对象内存空间
+instance(memory); // 2. 调用instance方法初始化对象
+instance = memory; // 3. 设置instance指向刚分配的内存空间
+
+重排后2和3顺序可能会被调换，此时instance!=null，但初始化还没完成，会发生错误。
+*/
+```
+
+
+
+### volatile 和  synchronized的区别
+
+1. volatile本质是告诉JVM当期变量在工作内存中的值不确定，要去主内存中读取；synchronized是坐定当前变量，只有当前线程可以访问、操作，其他线程会被阻塞直到变量操作结束。
+2. volatile只保证可见性，不保证原子性。synchronized两个都保证。
+3. volatile不造成阻塞；synchronized可能会阻塞。
+4. volatile标记的变量不会被编译器优化、指令重排；synchronized可以被优化。
+
+
+
+## CAS [Compare and Swap]
+
+一种高效实现线程安全性的方法，乐观锁lock-free。
+
+**实现**: 包含3个操作数 内存位置V、预期原值A、新值B，先对比内存中的值是否为A，如果是则修改值为B，否则返回更新失败。
+
+### ABA问题
+
+如果一个值是A，然后被改成B，最后又改回B时，如果之对比预期原值会认为这个值没被改变。Java中使用AtomicStampedReference解决ABA问题解决。
+
+
+
+## 线程池
+
+### 为什么会用线程池
+
+处理大量短时间任务时，会有大量的时间消耗在线程创建和销毁上，线程池可以减少这种消耗。
+
+### Java线程池框架
+
+
+
+<img src="img/Executor框架.png" alt="image-20191010140023494" style="zoom:30%;" />
+
+**Executor**接口和**ExecutorService**接口为**任务执行细节**和**提交**起到**解耦**作用:
+**Executor**接口只负责任务运行。
+**ExecutorService**接口负责任务提交，还有管理线程。
+
+#### Executor接口
+
+运行任务的简单接口，只负责执行任务。接口只有一个方法:
+
+```java
+void execute(Runnable command);
+```
+
+
+
+#### ExecutorService接口
+
+ 继承Executor接口，提供任务提交、任务管理的接口。
+
+
+
+#### ScheduledExecutorService接口
+
+继承ExecutorService接口，提供定时任务提交的接口。
+
+
+
+#### Executors
+
+**使用Executors创建不同的线程池满足不同的需求**:
+
+返回**ThreadPoolExecutor**:
+
+1. **newFixedThreadPool(int)** 指定工作线程池
+2. **newCachedThreadPool()** 处理大量短时间任务的线程池
+   1. 缓存线程来并重用，没有可用缓存线程时，创建新的线程
+   2. 缓存线程闲置时间过长，会被移除缓存、销毁。
+   3. 系统长时间闲置的时候不会消耗资源
+
+返回**ScheduledThreadPoolExecutor**:
+
+1. **newSingleThreadExecutor()** 创建单一线程来执行任务，如果线程异常，会创建新的线程取代它。
+2. **newSingleThreadScheduleExecutor()**和**newScheduledThreadPool(int)** 定时任务，区别只在于是单一线程还是多线程。
+3. **newWorkStealingPool()** 内建ForkJoinPool
+
+
+
+1-3返回的都是使用ThreadPoolExecutor对象。
+
+
+
+
+
+# Java异常
+
+##异常机制主要回答三个问题
+
+**What**: **异常类型**回答什么异常被抛出
+
+**Where**: **异常堆栈跟踪**回答哪里抛出
+
+**Why**: **异常信息**回答为什么抛出
+
+
+
+## 异常体系
+
+<img src="img/异常体系.png" alt="image-20191010153554499" style="zoom:40%;" />
+
+**Error**: 程序**无法处理**的系统错误。编译器不做检查。
+**Exception**: 程序**可处理**得异常，捕捉后可恢复。
+	**RuntimeException**: 不可预知，编译器不检查。
+	**CheckedException/非RuntimeException**: 可预知，编译器检查。
+
+
+
+# 集合
+
+<img src="img/集合框架.png" alt="collection" style="zoom:78%;" />
+
+**List**: 有序[存入取出的顺序一致]，可重复
+**Set**: 无序，不可重复
+
+**ArrayList**: 数组实现。查询快、增删慢。线程不安全
+**Vector**: 数组实现。 查询快、增删慢。线程安全
+**LinkedList**: 链表实现。查询慢、增删快。线程不安全
+
+**HashMap**: 可存null。数组+链表/红黑树。线程不安全
+**HashTable**:不可存null。数组+链表。线程不安全
+**ConcurrentHashMap** 不可存null。数组+链表/红黑树。线程安全
+
+## HashMap
+
+HashMap使用延迟初始化，put之后才开始初始化。**适合存储key值不可变的元素。**
+Java8以前: 数组+链表
+Java8: 数组+链表/红黑树
+
+
+
+### 减少hash碰撞
+
+把hash值高16位和低16位做异或运算。增加随机性。
+
+
+
+### 为什么Map大小总是${2^n}$
+
+为了提高计算下标的速度。用hash值计算下标时，如果用${hash\%size}$计算速度会慢。
+
+当$size=2^n$时，以下两个公式等价。&运算比%运算更快。
+$hash\&(size-1)$ == ${hash\%size}$
+
+
+
+<img src="img/hash计算.png" alt="image-20191011131649186" style="zoom:50%;" />
+
+### put(K key, V val)
+
+1. 如果map没有初始化，则通过resize()初始化。
+2. 计算key的hash值，将高16位与低16位做异或运算，然后跟size-1进行&运算得出下标。
+3. 如果没有hash碰撞，则存入。
+4. 如果碰撞了，桶内没有equals的key，放到链表最后面。
+5. 如果桶内元素个数大于TREEIFY_THRESHOLD，则将链表转化为红黑树。
+6. 如果通内存在这个值，则替换旧值。
+7. 如果map的元素个数大于THRESHOLD，通过resize()扩容。
+
+
+
+### 使HashMap线程安全
+
+通过调用Collections.synchronizedMap(HashMap)获得线程安全的map，返回的map与HashTable相似，只是锁的对象不一样，返回的map锁的是Object mutex对象；HashTable锁的是this对象。
+
+
+
+## ConcurrentHashMap
+
+对HashTable进行优化，HashTable的锁范围是方法级别的，可以通过使锁粒度更细进行优化。
+
+早期ConcurrentHashMap使用的是Segment分段锁，将table分成不同的段，对段上锁。**数据结构**: 数组+链表
+
+后期，更加的细化锁的大小。对table里的每个桶配一把锁。用**CAS+synchronized**来锁。**数据结构**: 数组+链表/红黑树
+
+
+
+### put(K key, V Val)
+
+1. 如果map没有初始化，则初始化
+2. 用key的hash值计算下标
+3. 如果没有hash碰撞。通过CAS插入，失败则重新插入尝试。
+4. 如果碰撞，则用synchronized代码块锁桶的第一个元素。
+5. 如果桶内是有相同元素，直接替换旧值。
+6. 如果没有，插入到链表末尾。
+7. 检查链表大小，过大转换为红黑树。
+8. 如果map过大，扩容。
+
+
+
+# JUC包
+
+类的种类:
+
+1. 线程执行器Executor
+2. 锁Lock
+3. 原子变量类Atomic
+4. 并发工具类
+5. 并发集合类
+
+<img src="img/juc包的类.png" alt="image-20191011140135029" style="zoom:70%;" />
+
+## 并发工具类
+
+1. CountDownLatch
+2. CyclicBarrier
+3. Semaphore
+4. Exchanger
+
+
+
+### CountDownLatch
+
+让一个线程等待一组事件发生后继续执行。
+
+**实现**: 初始化一个值cnt，主线程调用await()，cnt大于0时阻塞；每当其他线程调用countDown()这个cnt减1，这些线程调用后不阻塞继续执行。当cnt等于0时，主线程恢复运行。
+
+<img src="img/CountDownLatch.png" alt="image-20191011141145016" style="zoom:40%;" />
+
+### CyclicBarrier
+
+让所有线程阻塞，直到所有线程到达某个点后恢复所有线程。与CountDownLatch区别是子线程也会阻塞。
+
+实现: 初始化一个值cnt，当线程调用await()后阻塞并且这个cnt减1。如果cnt等于0，则恢复所有阻塞的线程。
+
+<img src="img/CyclicBarrier.png" alt="image-20191011141622378" style="zoom:40%;" />
+
+### Semaphore
+
+控制某个资源可被同时访问的线程个数。
+
+**实现**: 设置限制的个数x。当线程请求资源时调用acquire()方法，x大于0时，x减1；否则阻塞，等待其他线程释放资源，调用release()使x加1。
+
+<img src="img/Semaphore.png" alt="image-20191011142357496" style="zoom:30%;" />
+
+### Exchanger
+
+两个线程到达同步点后，相互交换数据。另一方没到达则阻塞线程。
+
+**实现**: 调用exchange(T t)方法，阻塞直到另一个线程也运行这个方法。
+
+<img src="img/Exchanger.png" alt="image-20191011142952724" style="zoom:28%;" />
+
+
+
+## 并发集合类
+
+### BlockingQueue
+
+提供可阻塞的入队和出队操作。主要用于生产消费者模式。
+
+<img src="img/BlockingQueue.png" alt="image-20191011143459827" style="zoom:28%;" />
+
+#### 实现类 都是线程安全的。
+
+1. **ArrayBlockingQueue**
+2. **LinkedBlockingQueue**
+3. **PriorityBlockingQueue**
+
+1. DelayQueue
+2. SynchronousQueue
+3. LinkedTransferQueue
+4. LinkedBlockingDeque
+
+
+
+# IO
+
+## BIO 阻塞IO
+
+<img src="img/BIO.png" alt="image-20191011145134513" style="zoom:20%;" />
+
+InputSream/OutputStream 字节流
+Reader/Writer 字符流
+
+## NIO 非阻塞IO
+
+多路复用的、同步非阻塞IO
+
+<img src="img/NIO.png" alt="image-20191011145413468" style="zoom:20%;" />
+
+### Channel
+
+1. FileChannel
+2. DatagramChannel
+3. SocketChannel/ServerSocketChannel
+
+transferTo/transferFrom操作支持channel拷贝，并且这种拷贝可以避免数据从内核复制到用户空间。效率高。
 
 
 
