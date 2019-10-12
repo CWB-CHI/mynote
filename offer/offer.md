@@ -1732,6 +1732,154 @@ transferTo/transferFrom操作支持channel拷贝，并且这种拷贝可以避�
 
 # Spring
 
+## 特点
+
+### Spring优点
+
+**低侵入式**: 项目里的类不实现或继承框架里的接口或类。代码污染低。
+**易扩展**: 对其他框架提供支持。如Struts、Mybatis、Hibernate。
+**解耦**: 降低对象之间的耦合，通过IOC容器管理对象，避免硬编码过度耦合。
+
+
+
+### Spring中的模块
+
+<img src="img/spring模块.png" alt="spring" style="zoom:85%;" />
+
+Core Container: 核心容器。
+Context: Spring上下文，向Spring提供配置信息
+ORM
+JDBC
+AOP
+
+### 依赖倒置&控制反转[IOC]&IOC容器&依赖注入DI 的关系
+
+<img src="img/关系.png" alt="image-20191012144555979" style="zoom:30%;" />
+
+**依赖倒置**: 是一种思想。上层模块不应依赖下层模块，而应该依赖其抽象。
+
+**控制反转[IOC]**: **对象创建**和**对象之间关系管理**原本是用硬编码管理的，现在交给**IOC容器**管理，这就是**控制反转**。减少代码之间的耦合。常见的实现方式是**依赖注入[DI]**。
+
+**依赖注入[DI]**的4种注入方式:
+
+1. setter
+2. 构造函数
+3. Annotation注解
+4. Interface
+
+
+
+## Srping IOC
+
+**支持的功能**: **依赖注入**/检查，**自动装配**、支持集合、指定初始化方法/销毁方法、支持回调方法。
+
+### Spring IOC容器的核心接口
+
+#### BeanFactory
+
+**功能**：
+
+1. 提供IOC的配置机制
+2. 包含Bean的各种定义，便于实例Bean
+3. Bean生命周期控制、Bean之间的依赖关系管理
+
+
+
+#### BeanFactory体系结构
+
+**ListableBeanFactory**: 定义了访问容器中Bean基本信息的方法。
+**HierarchicalBeanFactory**: 定义访问父容器的方法。例如父容器不可访问子容器的Bean。SpringMVC是一个子容器可以看父容器[业务层]的Bean，但父容器不能查看SpringMVC的Bean。
+**ConfigurableBeanFactory**:  提供方法去配置BeanFactory。可设置类加载器、属性遍历器等。
+**AutowireCapableBeanFactory**: 定义Bean的自动匹配规则。
+
+<img src="img/BeanFactory体系.png" alt="image-20191012161544182" style="zoom:38%;" />
+
+
+
+
+
+#### ApplicationContext
+
+与BeanFactory对比: BeanFactory是Spring框架的基础；ApplicationContext是BeanFactory的子接口，具备更多的功能。
+
+### BeanDefinition
+
+用来描述Bean的定义，对Bean的配置会转化成BeanDefinition对象。
+
+### BeanDefinitionRegistry
+
+提供向IOC容器[BeanFactory]注册BeanDefinition对象的方法:
+
+1. (BeanName, BeanDefinition对象) 键值对 放到**DefaultListableBeanFactory[BeanFactory的实现类]**的**beanDefinitionMap**中。
+2. BeanName全部放入**beanDefinitionNames**中。
+
+```java 
+public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
+		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
+...
+	// 1
+	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
+	// 2
+	private final List<String> beanDefinitionNames = new ArrayList<String>(64);
+...
+```
+
+
+
+## Spring Bean
+
+### 作用域
+
+1. singleton 默认作用域，单例
+2. prototype 每次获取都会创建新的对象
+3. request 每个HTTP请求都会创建一个新对象
+4. session 每个会话都会创建一个新对象
+5. globalSession 
+
+### Bean生命周期
+
+#### 创建过程
+
+1. 实例化Bean
+2. Aware [如果实现了Aware接口，注入BeanID、BeanFactory、ApplicationContext来获得IOC容器信息]
+3. BeanPostProcessor的postProcessBeforeInitialization方法
+4. InitializingBean的afterPropertiesSet方法
+5. 定制的Bean init方法
+6. BeanPostProcessor的postProcessAfterInitialization方法
+7. 初始化完成
+
+#### 销毁过程
+
+1. 如果实现了DisposableBean接口，则调用destroy方法。
+2. 若配置了destroy-method属性，则调用配置的销毁方法。
+
+
+
+## Spring AOP
+
+### AOP的3中织入方法
+
+1. 编译时织入: 需要特殊的编译器，AspectJ
+2. 类加载时织入: 同上
+3. 运行时织入: Spring采用的方式。通过动态代理[JDK动态代理/Cglib]实现。
+
+### 主要名词
+
+**Aspect**: 通用功能代码。
+**Target**: 被织入Aspect的对象。
+**Join Point**: 可作为切入点的地方，所有方法都可以作为切入点。
+**Pointcut**: 切入点。定义Aspect被用在哪些Join Point切入点中。
+**Advice**: 通知方法。
+
+**Advice的种类**: Before、After、AfterReturning、AfterThrowing、Around
+
+
+
+## Spring 事务
+
+
+
+
 
 
 
