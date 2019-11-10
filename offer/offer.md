@@ -75,7 +75,7 @@ x  FIN:finish标志。用于释放连接。
 2. B接收到请求。连接状态从关闭、监听到同步接受【SYN-RCVD】。并且发送回馈报文[SYN=1,ACK=1,seq=y y为任意整数, ack=x+1]。
 3. A接受到报文。转态转为连接已建立[ESTABLISHED] 。并返回报文[SYN=0,ACK=1,seq=x+1,ack=y+1]。B接受到报文。转态转为连接已建立。
 
-<img src="img/三次握手.png" alt="image-2019091917312523" style="zoom:35%;" />
+<img src="img/三次握手.png" alt="image-2019091917312523" style="zoom:25%;" />
 
 1、2报文段不可携带数据。即SYN=1。但3可以携带，也可不带。
 
@@ -1178,10 +1178,6 @@ notifyAll: 所有等待池中的线程进入锁池，获得竞争资格。
 
 
 
-
-
-
-
 ## Java中线程状态
 
 * **New**[新建] 创建后尚未启动的线程
@@ -1465,20 +1461,20 @@ void execute(Runnable command);
 返回**ThreadPoolExecutor**:
 
 1. **newFixedThreadPool(int)** 指定工作线程池
+
 2. **newCachedThreadPool()** 处理大量短时间任务的线程池
    1. 缓存线程来并重用，没有可用缓存线程时，创建新的线程
    2. 缓存线程闲置时间过长，会被移除缓存、销毁。
    3. 系统长时间闲置的时候不会消耗资源
+   
+3. **newSingleThreadExecutor()** 创建单一线程来执行任务，如果线程异常，会创建新的线程取代它。
 
 返回**ScheduledThreadPoolExecutor**:
 
-1. **newSingleThreadExecutor()** 创建单一线程来执行任务，如果线程异常，会创建新的线程取代它。
 2. **newSingleThreadScheduleExecutor()**和**newScheduledThreadPool(int)** 定时任务，区别只在于是单一线程还是多线程。
 3. **newWorkStealingPool()** 内建ForkJoinPool
 
 
-
-1-3返回的都是使用ThreadPoolExecutor对象。
 
 
 
@@ -1773,6 +1769,22 @@ AOP
 
 **支持的功能**: **依赖注入**/检查，**自动装配**、支持集合、指定初始化方法/销毁方法、支持回调方法。
 
+
+
+### IOC初始化过程
+
+https://blog.csdn.net/gchd19921992/article/details/79097969
+
+* BeanDefinition的Resouce定位和读取
+* 载入注册
+* 生成实例 缓存
+
+<img src="img/IOC初始.png" alt="image-2019102221531956" style="zoom:40%;" />
+
+
+
+
+
 ### Spring IOC容器的核心接口
 
 #### BeanFactory
@@ -1925,14 +1937,241 @@ cmd1|cmd2|cmd3
 
 一次读取一行，按分隔符进行切片，切成多个部分放入内建变量中\$1,\$2,...\$n，\$0表示整行数据
 
-
-
 ## sed
 
 流编辑器，适合用正则表达式处理内容，批量替换、修改。
 
+## pipeline
 
 
 
 
+
+# Redis
+
+## 面试题
+
+### 海量key中查询出某一个固定前缀的key
+
+1. keys 一次性返回所有匹配的结果，数据量大会卡顿
+2. scan 一次返回部分结果
+
+### 如何通过Redis实现分布式锁
+
+#### setnx
+
+**setnx key value**:
+如果key不存在，则创建，返回1。存在则返回0。
+时间复杂度: O(1)
+
+
+
+**实现**: 加锁和解锁非原子性操作，容易发生问题。如解锁前程序挂了，就无法解锁。
+**加锁**: setnx key value
+**解锁**: 设置过期时间 expire key time
+
+####set
+
+set key value [ex seconds] [px milliseconds] [nx|xx]:
+**ex seconds**: 过期时间 单位秒
+**px milliseconds**: 过期时间 单位毫秒
+**nx**: 只在键**不存在**时进行设置
+**xx**: 只在键**存在**时进行设置
+**返回**: 成功OK，否则nil
+
+### 大量key同时过期
+
+**问题**: 集中过期，清除大量key耗时，会出现卡顿
+**解决**: 过期时间加个随机值
+
+
+
+### 如何hs用Redis做异步队列
+
+#### rpush+lpop/blpop
+
+使用List作为队列。rpush生产消息，lpop/blpop消费消息。
+lpop: 队列空不阻塞
+blpop: 队列空则阻塞，直到有消息或超时。
+
+**缺点**: 只能有一个消费者消费，因为lpop/blpop之后消息就没了
+
+
+
+#### publish subscribe
+
+发布订阅模式。发送者publish发送消息，订阅者subscribe接受消息。
+订阅者可以订阅多个频道。
+<img src="img/pubsub.png" alt="image-20191014102810119" style="zoom:20%;" />
+
+**缺点**: 消息发布无状态，无法保证消息送达。如订阅者下线后无法收到消息。此时应使用专业的消息队列kafka
+
+
+
+### Redis如何做持久化
+
+#### RDB 快照持久化
+
+save: 阻塞Redis服务器进程，直到RDB文件创建完成。
+bgsave: fork出一个子进程来创建RDB，非阻塞。若有AOF或RDB在进行，则返回错误
+
+**RDB触发点**:
+根据redis.conf配置save m n [其实用的是bgsave]
+主从复制的时候，主节点自动触发
+执行debug reload
+执行shutdown且没有开启AOF持久化
+
+**缺点**: 
+同步的是全部数据，数据量大时会影响性能。
+Redis挂掉可能会丢失数据，因为还未触发RDB。
+
+#### AOF 保存写状态持久化
+
+Appedn-Only-File[AOF]: 记录所有除查询以外的写操作指令。以append的形式追加到AOF文件后面。
+
+AOF文件过大，日志会重写以精简AOF文件:
+调用fork，创建一个子进程把AOF写到临时文件中，不依赖原有的AOF文件，主进程将新的变动写到临时文件和原AOF文件中。完成重写后替换原AOF文件。
+
+#### RDB-AOF混合持久化方式
+
+bgsave做全量持久化，aof做增量持久化。
+
+#### Redis 数据恢复
+
+启动时，恢复数据，有AOF则忽略RDB。
+
+#### RDB AOF优缺点
+
+RDB优点 全部数据快照，文件小，恢复快。
+RDB缺点 无法保存最近一次快照之后的数据。
+
+AOF优点 可读性高，数据不已丢失。
+AOF缺点 文件体积大，恢复时间长。
+
+
+
+
+
+
+
+## Memcache和Redis区别
+
+**Memcache**:
+
+代码层次类似Hash
+
+1. 支持简单数据类型
+2. 不支持数据持久化存储
+3. 不支持主从
+4. 不支持分片
+
+**Redis**:
+
+1. 数据类型丰富
+2. 支持持久化存储
+3. 支持主从
+4. 支持分片
+
+## 为什么Redis这么快
+
+1. 基于内存
+2. 数据结构简单
+3. 单线程
+4. 多路复用IO
+
+## File Descriptor [FD]
+
+文件描述符
+
+
+
+## 数据类型
+
+1. String
+2. Hash
+3. List
+4. Set
+5. Sorted Set
+
+## 命令
+
+### key相关
+
+del key
+dump key
+exists key
+expire key seconds
+ttl key
+type key
+
+### String 相关
+
+set key value
+mset k1 v1 [k2 v2 k3 v3...]
+setnx key value
+
+get key
+mget key1 [key2 key3...]
+
+getset key value
+
+Incr key
+incrby key increment
+decr key
+decrby key decrement
+
+strlen key
+
+### hash 相关
+
+hset key k1 v1 [k2 v2 ...]
+
+hdel key kn
+
+hget key kn
+hgetall key
+
+hlen key
+
+###list 相关
+
+lpush/rpush key value
+
+lpop/rpop/blpop/brpop key 
+
+### set相关
+
+sadd key v1 [v2,v3...]
+
+smembers key
+sismember key vn
+
+spop key
+srem key vn [v...]
+
+sinter k1 [k2 ...]
+sunion k1 [k2 ...]
+sdiff k1 [k2 ...]
+
+scard key
+
+### sorted set相关
+
+zadd key score1 member1 [score2 member2]
+
+zcard key
+
+
+
+# Maven
+
+## 生命周期
+
+validate
+compile
+test
+package
+verify
+install
+deploy
 
