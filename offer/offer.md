@@ -257,7 +257,7 @@ SSL[Security Sockets Layer]安全套接层：
 2. 服务器选择一个算法，以证书的形式回发给浏览器。
 3. 浏览器验证证书，结合证书里的公钥，用公钥加密客户生成的秘钥，发送给服务器。
 4. 服务器解密，获得客户秘钥，验证，返回用客户秘钥加密的响应信息。
-5. 浏览器用客户秘钥解密响应信息，验证，进行加密交互数据。
+5. 浏览器解密响应信息，验证，进行加密交互数据。
 
 
 
@@ -289,7 +289,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 ##  索引
 
-**索引数据结构:**
+### 索引数据结构
 
 1. 二叉查找树
 2. B-Tree 【B指代Balance】
@@ -299,7 +299,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 
 
-###    B-Tree
+####    B-Tree
 
 <img src="img/Btree.png" alt="image-20190920173142947" style="zoom:40%;" />
 
@@ -318,7 +318,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 
 
-###  B+Tree
+####  B+Tree
 
 <img src="img/B+Tree.png" alt="image-20190920173301706" style="zoom:40%;" />
 
@@ -331,7 +331,7 @@ SSL[Security Sockets Layer]安全套接层：
 
 
 
-### Hash索引
+#### Hash索引
 
 **缺点**
 
@@ -599,7 +599,7 @@ Java反射是指运行时，对于类，可以知道它的所有方法和属性�
 
 
 
-### JVM内存模型
+### JVM内存划分
 
 <img src="img/jvm内存模型.png" alt="image-20190926211125473" style="zoom:40%;" />
 
